@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lettrix</title>
+  <meta name="theme-color" content="#6aaa64" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Lettrix" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
+  <script>
+    const manifest = {
+      name: "Lettrix", short_name: "Lettrix",
+      description: "Trouve le mot de 5 lettres en 6 essais !",
+      start_url: "/", display: "standalone",
+      background_color: "#ffffff", theme_color: "#6aaa64",
+      icons: [{ src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E", sizes: "any", type: "image/svg+xml", purpose: "any maskable" }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+    const link = document.createElement("link");
+    link.rel = "manifest"; link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    const MOTS = [...new Set([
+      "AVION","BALLE","CARTE","DANSE","ECLAT","FABLE","GRACE","HERBE","IMAGE","JARDN",
+      "LAMPE","MONDE","NUAGE","OLIVE","PISTE","REINE","SABLE","TAUPE","VAGUE","ARBRE",
+      "CHAMP","FROID","GERME","HOMME","IDEAL","JEUNE","LACET","MAGIE","NICHE","OCEAN",
+      "PLUIE","ROUGE","SIEGE","TITRE","UNION","VILLE","AIGLE","BRUIT","COEUR","DOIGT",
+      "EPICE","FLEUR","GILET","HIVER","LIVRE","MATIN","OPALE","PLAGE","RAYON","SOLDE",
+      "TIGRE","VOILE","ARENE","BELLE","CRABE","DELTA","ETANG","FOIRE","HONTE","JOLIE",
+      "LAPIN","MELON","NAPPE","POULE","RESTE","SOUPE","TREVE","UTILE","VERRE","ALOES",
+      "BARBE","CANNE","DROIT","FUITE","HOTEL","LIANE","MITRE","NATTE","OUATE","POIRE",
+      "RONCE","STADE","TOILE","VITRE","ABIME","BOITE","CADET","DEPOT","ETUVE","FIGUE",
+      "HERSE","JETON","LUEUR","MIXTE","NOBLE","RIVET","SUITE","TEINT","VOLET","ASTRE",
+      "BISON","CREPE","DIGUE","FLORE","GAZON","HUMUS","ICONE","JARRE","LIMON","MORSE",
+      "NOYER","ORVET","PERCE","ROGUE","SINGE","ALGUE","BLOND","CREUX","DIVIN","EPOUX",
+      "FUMET","MEUTE","OZONE","PIXEL","RADAR","SPORT","ULTRA","VIEUX","ATLAS","BULLE",
+      "CYCLE","DENIM","EVEIL","FALOT","MYTHE","SAUCE","TURBO","VEGAN","JOUER","QUEUE"
+    ].filter(m => m.length === 5 && /^[A-Z]{5}$/.test(m)))];
+
+    const MOT_SECRET = MOTS[Math.floor(Math.random() * MOTS.length)];
+    const MAX_ESSAIS = 6;
+
+    const CLAVIER = [
+      ["A","Z","E","R","T","Y","U","I","O","P"],
+      ["Q","S","D","F","G","H","J","K","L","M"],
+      ["ENTRÉE","W","X","C","V","B","N","⌫"]
+    ];
+
+    function getCouleur(lettre, index, mot) {
+      if (mot[index] === lettre) return "correct";
+      if (mot.includes(lettre)) return "present";
+      return "absent";
+    }
+
+    const couleurClass = { correct:"#6aaa64", present:"#c9b458", absent:"#787c7e" };
+
+    function App() {
+      const [essais, setEssais] = useState([]);
+      const [actuel, setActuel] = useState("");
+      const [fini, setFini] = useState(false);
+      const [gagne, setGagne] = useState(false);
+      const [erreur, setErreur] = useState("");
+      const [lettresStatus, setLettresStatus] = useState({});
+
+      const soumettre = useCallback(() => {
+        if (actuel.length !== 5) {
+          setErreur("Le mot doit avoir 5 lettres !");
+          setTimeout(() => setErreur(""), 1500);
+          return;
+        }
+        const nouveauxEssais = [...essais, actuel];
+        setEssais(nouveauxEssais);
+        setActuel("");
+
+        const newStatus = { ...lettresStatus };
+        for (let i = 0; i < 5; i++) {
+          const l = actuel[i];
+          const c = getCouleur(l, i, MOT_SECRET);
+          const priorite = { correct:3, present:2, absent:1 };
+          if (!newStatus[l] || priorite[c] > priorite[newStatus[l]]) newStatus[l] = c;
+        }
+        setLettresStatus(newStatus);
+
+        if (actuel === MOT_SECRET) { setGagne(true); setFini(true); }
+        else if (nouveauxEssais.length >= MAX_ESSAIS) { setFini(true); }
+      }, [actuel, essais, lettresStatus]);
+
+      const ajouterLettre = useCallback((l) => {
+        if (fini) return;
+        if (l === "⌫") { setActuel(a => a.slice(0, -1)); return; }
+        if (l === "ENTRÉE") { soumettre(); return; }
+        if (actuel.length < 5) setActuel(a => a + l);
+      }, [fini, actuel, soumettre]);
+
+      useEffect(() => {
+        const handler = (e) => {
+          const k = e.key.toUpperCase();
+          if (k === "BACKSPACE") ajouterLettre("⌫");
+          else if (k === "ENTER") ajouterLettre("ENTRÉE");
+          else if (/^[A-Z]$/.test(k)) ajouterLettre(k);
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+      }, [ajouterLettre]);
+
+      return (
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", minHeight:"100vh", paddingTop:20 }}>
+          <h1 style={{ letterSpacing:6, fontSize:28, fontWeight:800, borderBottom:"2px solid #ddd", paddingBottom:10, marginBottom:16, color:"#1a1a1a" }}>
+            LETTRIX 🇫🇷
+          </h1>
+
+          {/* Grille */}
+          <div style={{ display:"flex", flexDirection:"column", gap:6, marginBottom:20 }}>
+            {Array.from({ length: MAX_ESSAIS }).map((_, i) => {
+              const essai = essais[i];
+              const estActuel = i === essais.length && !fini;
+              return (
+                <div key={i} style={{ display:"flex", gap:6 }}>
+                  {Array.from({ length: 5 }).map((_, j) => {
+                    let lettre = "", bg = "#fff", border = "2px solid #d3d6da", color = "#1a1a1a";
+                    if (essai) {
+                      lettre = essai[j];
+                      const c = getCouleur(lettre, j, MOT_SECRET);
+                      bg = couleurClass[c]; border = `2px solid ${couleurClass[c]}`; color = "#fff";
+                    } else if (estActuel) {
+                      lettre = actuel[j] || "";
+                      if (lettre) border = "2px solid #888";
+                    }
+                    return (
+                      <div key={j} style={{ width:58, height:58, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, fontWeight:800, border, background:bg, color, borderRadius:4 }}>
+                        {lettre}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+
+          {erreur && <div style={{ color:"#c00", fontWeight:700, marginBottom:10 }}>{erreur}</div>}
+
+          {fini && (
+            <div style={{ textAlign:"center", marginBottom:14 }}>
+              {gagne
+                ? <div style={{ color:"#6aaa64", fontWeight:800, fontSize:20 }}>🎉 Bravo ! Tu as trouvé <b>{MOT_SECRET}</b> !</div>
+                : <div style={{ color:"#c00", fontWeight:800, fontSize:18 }}>😢 Dommage ! Le mot était <b>{MOT_SECRET}</b></div>}
+              <button onClick={() => window.location.reload()} style={{ marginTop:10, padding:"8px 22px", background:"#6aaa64", color:"#fff", border:"none", borderRadius:6, fontSize:16, cursor:"pointer", fontWeight:700 }}>
+                Rejouer
+              </button>
+            </div>
+          )}
+
+          {/* Clavier */}
+          <div style={{ display:"flex", flexDirection:"column", gap:6, width:"100%", padding:"10px 16px 24px" }}>
+            {CLAVIER.map((rangee, i) => (
+              <div key={i} style={{ display:"flex", gap:5, justifyContent:"center" }}>
+                {rangee.map(l => {
+                  const st = lettresStatus[l];
+                  const bg = st ? couleurClass[st] : "#d3d6da";
+                  const col = st ? "#fff" : "#1a1a1a";
+                  return (
+                    <button key={l} onClick={() => ajouterLettre(l)} style={{ flex: l.length > 1 ? 1.6 : 1, padding:"14px 0", minWidth:0, background:bg, color:col, border:"none", borderRadius:4, fontWeight:700, fontSize: l.length > 1 ? 11 : 16, cursor:"pointer" }}>
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
