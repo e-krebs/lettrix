@@ -84,7 +84,8 @@
       return result;
     }
 
-    const couleurClass = { correct:"#538d4e", present:"#b59f3b", absent:"#3a3a3c" };
+    const couleurTile   = { correct:"#538d4e", present:"#b59f3b", absent:"#3a3a3c" };
+    const couleurClavier = { correct:"#538d4e", present:"#b59f3b", absent:"#565758" };
 
     function App() {
       const [essais, setEssais] = useState([]);
@@ -154,7 +155,7 @@
                       lettre = essai[j];
                       const couleurs = getCouleursEssai(essai, MOT_SECRET);
                       const c = couleurs[j];
-                      bg = couleurClass[c]; border = `2px solid ${couleurClass[c]}`; color = "#fff";
+                      bg = couleurTile[c]; border = `2px solid ${couleurTile[c]}`; color = "#fff";
                     } else if (estActuel) {
                       lettre = actuel[j] || "";
                       if (lettre) border = "2px solid #999";
@@ -189,7 +190,7 @@
               <div key={i} style={{ display:"flex", gap:5, justifyContent:"center" }}>
                 {rangee.map(l => {
                   const st = lettresStatus[l];
-                  const bg = st ? couleurClass[st] : "#818384";
+                  const bg = st ? couleurClavier[st] : "#818384";
                   const col = "#fff";
                   return (
                     <button key={l} onClick={() => ajouterLettre(l)} style={{ flex: l.length > 1 ? 1.6 : 1, padding:"14px 0", minWidth:0, background:bg, color:col, border:"none", borderRadius:4, fontWeight:700, fontSize: l.length > 1 ? 11 : 16, cursor:"pointer" }}>
