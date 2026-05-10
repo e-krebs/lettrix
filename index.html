@@ -25,7 +25,7 @@
   </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #fff; }
+    body { font-family: 'Segoe UI', sans-serif; background: #121213; color: #fff; }
   </style>
 </head>
 <body>
@@ -120,8 +120,8 @@
       }, [ajouterLettre]);
 
       return (
-        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", minHeight:"100vh", paddingTop:20 }}>
-          <h1 style={{ letterSpacing:6, fontSize:28, fontWeight:800, borderBottom:"2px solid #ddd", paddingBottom:10, marginBottom:16, color:"#1a1a1a" }}>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", minHeight:"100vh", paddingTop:20, background:"#121213", color:"#fff" }}>
+          <h1 style={{ letterSpacing:6, fontSize:28, fontWeight:800, borderBottom:"2px solid #3a3a3c", paddingBottom:10, marginBottom:16, color:"#fff" }}>
             LETTRIX 🇫🇷
           </h1>
 
@@ -133,14 +133,14 @@
               return (
                 <div key={i} style={{ display:"flex", gap:6 }}>
                   {Array.from({ length: 5 }).map((_, j) => {
-                    let lettre = "", bg = "#fff", border = "2px solid #d3d6da", color = "#1a1a1a";
+                    let lettre = "", bg = "#121213", border = "2px solid #3a3a3c", color = "#fff";
                     if (essai) {
                       lettre = essai[j];
                       const c = getCouleur(lettre, j, MOT_SECRET);
                       bg = couleurClass[c]; border = `2px solid ${couleurClass[c]}`; color = "#fff";
                     } else if (estActuel) {
                       lettre = actuel[j] || "";
-                      if (lettre) border = "2px solid #888";
+                      if (lettre) border = "2px solid #999";
                     }
                     return (
                       <div key={j} style={{ width:58, height:58, display:"flex", alignItems:"center", justifyContent:"center", fontSize:26, fontWeight:800, border, background:bg, color, borderRadius:4 }}>
@@ -172,8 +172,8 @@
               <div key={i} style={{ display:"flex", gap:5, justifyContent:"center" }}>
                 {rangee.map(l => {
                   const st = lettresStatus[l];
-                  const bg = st ? couleurClass[st] : "#d3d6da";
-                  const col = st ? "#fff" : "#1a1a1a";
+                  const bg = st ? couleurClass[st] : "#818384";
+                  const col = "#fff";
                   return (
                     <button key={l} onClick={() => ajouterLettre(l)} style={{ flex: l.length > 1 ? 1.6 : 1, padding:"14px 0", minWidth:0, background:bg, color:col, border:"none", borderRadius:4, fontWeight:700, fontSize: l.length > 1 ? 11 : 16, cursor:"pointer" }}>
                       {l}
