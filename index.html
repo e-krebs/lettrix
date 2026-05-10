@@ -62,10 +62,26 @@
       ["ENTRÉE","W","X","C","V","B","N","⌫"]
     ];
 
-    function getCouleur(lettre, index, mot) {
-      if (mot[index] === lettre) return "correct";
-      if (mot.includes(lettre)) return "present";
-      return "absent";
+    function getCouleursEssai(essai, mot) {
+      const result = Array(5).fill("absent");
+      const restant = [...mot];
+      // 1er passage : lettres bien placées (vert)
+      for (let i = 0; i < 5; i++) {
+        if (essai[i] === mot[i]) {
+          result[i] = "correct";
+          restant[i] = null;
+        }
+      }
+      // 2ème passage : lettres présentes mais mal placées (jaune)
+      for (let i = 0; i < 5; i++) {
+        if (result[i] === "correct") continue;
+        const idx = restant.indexOf(essai[i]);
+        if (idx !== -1) {
+          result[i] = "present";
+          restant[idx] = null;
+        }
+      }
+      return result;
     }
 
     const couleurClass = { correct:"#538d4e", present:"#b59f3b", absent:"#3a3a3c" };
@@ -136,7 +152,8 @@
                     let lettre = "", bg = "#121213", border = "2px solid #3a3a3c", color = "#fff";
                     if (essai) {
                       lettre = essai[j];
-                      const c = getCouleur(lettre, j, MOT_SECRET);
+                      const couleurs = getCouleursEssai(essai, MOT_SECRET);
+                      const c = couleurs[j];
                       bg = couleurClass[c]; border = `2px solid ${couleurClass[c]}`; color = "#fff";
                     } else if (estActuel) {
                       lettre = actuel[j] || "";
