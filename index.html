@@ -11,41 +11,35 @@
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E" />
   <script>
-    const m={name:"Lettrix",short_name:"Lettrix",description:"Trouve le mot de 5 lettres en 6 essais !",start_url:"/",display:"standalone",background_color:"#121213",theme_color:"#6aaa64",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml",purpose:"any maskable"}]};
-    const b=new Blob([JSON.stringify(m)],{type:"application/json"});
-    const l=document.createElement("link");l.rel="manifest";l.href=URL.createObjectURL(b);document.head.appendChild(l);
+    const mn={name:"Lettrix",short_name:"Lettrix",description:"Trouve le mot de 5 lettres en 6 essais !",start_url:"/",display:"standalone",background_color:"#121213",theme_color:"#6aaa64",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%236aaa64'/%3E%3Ctext x='256' y='340' font-family='Arial' font-size='280' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml",purpose:"any maskable"}]};
+    const bl=new Blob([JSON.stringify(mn)],{type:"application/json"});
+    const lk=document.createElement("link");lk.rel="manifest";lk.href=URL.createObjectURL(bl);document.head.appendChild(lk);
   </script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:'Segoe UI',sans-serif;background:#121213;color:#fff;}
-
     @keyframes flip {
-      0%  {transform:rotateX(0deg);   background:#3a3a3c; border-color:#3a3a3c;}
-      45% {transform:rotateX(-90deg); background:#3a3a3c; border-color:#3a3a3c;}
-      55% {transform:rotateX(90deg);  background:var(--tc); border-color:var(--tc);}
-      100%{transform:rotateX(0deg);   background:var(--tc); border-color:var(--tc);}
+      0%  {transform:scaleY(1); background:#3a3a3c;border-color:#3a3a3c;}
+      49% {transform:scaleY(0); background:#3a3a3c;border-color:#3a3a3c;}
+      51% {transform:scaleY(0); background:var(--tc);border-color:var(--tc);}
+      100%{transform:scaleY(1); background:var(--tc);border-color:var(--tc);}
     }
     @keyframes bounce {
       0%,100%{transform:translateY(0);}
-      30%    {transform:translateY(-26px);}
-      55%    {transform:translateY(-12px);}
-      75%    {transform:translateY(-18px);}
+      30%{transform:translateY(-26px);}
+      55%{transform:translateY(-12px);}
+      75%{transform:translateY(-18px);}
     }
     @keyframes shake {
       0%,100%{transform:translateX(0);}
-      20%    {transform:translateX(-8px);}
-      40%    {transform:translateX(8px);}
-      60%    {transform:translateX(-8px);}
-      80%    {transform:translateX(8px);}
-    }
-    @keyframes pop {
-      0%  {transform:scale(1);}
-      50% {transform:scale(1.12);}
-      100%{transform:scale(1);}
+      20%{transform:translateX(-8px);}
+      40%{transform:translateX(8px);}
+      60%{transform:translateX(-8px);}
+      80%{transform:translateX(8px);}
     }
     @keyframes fadeUp {
       from{opacity:0;transform:translateY(16px) scale(0.92);}
-      to  {opacity:1;transform:translateY(0)    scale(1);}
+      to{opacity:1;transform:translateY(0) scale(1);}
     }
   </style>
 </head>
@@ -57,23 +51,125 @@
 <script type="text/babel">
 const {useState,useEffect,useCallback,useRef} = React;
 
+// Mots solutions
 const MOTS = [...new Set([
-  "AVION","BALLE","CARTE","DANSE","ECLAT","FABLE","GRACE","HERBE","IMAGE",
-  "LAMPE","MONDE","NUAGE","OLIVE","PISTE","REINE","SABLE","TAUPE","VAGUE","ARBRE",
-  "CHAMP","FROID","GERME","HOMME","IDEAL","JEUNE","LACET","MAGIE","NICHE","OCEAN",
-  "PLUIE","ROUGE","SIEGE","TITRE","UNION","VILLE","AIGLE","BRUIT","COEUR","DOIGT",
-  "EPICE","FLEUR","GILET","HIVER","LIVRE","MATIN","OPALE","PLAGE","RAYON","SOLDE",
-  "TIGRE","VOILE","ARENE","BELLE","CRABE","DELTA","ETANG","FOIRE","HONTE","JOLIE",
-  "LAPIN","MELON","NAPPE","POULE","RESTE","SOUPE","TREVE","UTILE","VERRE","ALOES",
-  "BARBE","CANNE","DROIT","FUITE","HOTEL","LIANE","MITRE","NATTE","OUATE","POIRE",
-  "RONCE","STADE","TOILE","VITRE","ABIME","BOITE","CADET","DEPOT","ETUVE","FIGUE",
-  "HERSE","JETON","LUEUR","MIXTE","NOBLE","RIVET","SUITE","TEINT","VOLET","ASTRE",
-  "BISON","CREPE","DIGUE","FLORE","GAZON","HUMUS","ICONE","JARRE","LIMON","MORSE",
-  "NOYER","ORVET","PERCE","ROGUE","SINGE","ALGUE","BLOND","CREUX","DIVIN","EPOUX",
-  "FUMET","MEUTE","OZONE","PIXEL","RADAR","SPORT","ULTRA","VIEUX","ATLAS","BULLE",
-  "CYCLE","DENIM","EVEIL","FALOT","MYTHE","SAUCE","TURBO","VEGAN","JOUER","QUEUE",
-  "JUPON","BAGUE","PANDA","NŒUDS","GENOU","GRIOT","CACAO","BANJO","SEUIL","VERTU"
+  "ABIME","AIGLE","ALOES","ANCRE","ARBRE","ARENE","ASTRE","ATLAS","AVION",
+  "BALLE","BARBE","BELLE","BISON","BOITE","BULLE",
+  "CACAO","CADET","CARTE","CHAMP","COEUR","CRABE","CREPE","CYCLE",
+  "DANSE","DELTA","DEPOT","DIGUE","DOIGT","DROIT",
+  "ECLAT","EPICE","ETANG","ETUVE","EVEIL",
+  "FABLE","FLEUR","FORET","FROID","FUITE",
+  "GAZON","GERME","GILET","GRACE","GRIOT",
+  "HERBE","HIVER","HOMME","HONTE","HOTEL","HUMUS",
+  "IMAGE","IDEAL","ICONE",
+  "JARRE","JEUNE","JOLIE","JOUER",
+  "LACET","LAMPE","LAPIN","LIANE","LIMON","LIVRE",
+  "MAGIE","MATIN","MELON","MONDE","MORSE","MULOT","MYTHE",
+  "NAPPE","NICHE","NOBLE","NOYER","NUAGE",
+  "OCEAN","OLIVE","OPALE","ORVET","OUATE","OZONE",
+  "PERCE","PISTE","PIXEL","PLAGE","POULE",
+  "RADAR","RAYON","REINE","RONCE","ROUGE",
+  "SABLE","SIEGE","SINGE","SOLDE","SOUPE","SPORT","STADE","SUITE",
+  "TAUPE","TIGRE","TITRE","TOILE","TURBO",
+  "UNION","USINE","UTILE",
+  "VAGUE","VILLE","VITRE","VOILE","VOLET",
+  "WAGON","YACHT",
+  "AIGLE","BANJO","BIJOU","BLOND","BRUIT",
+  "CONTE","CORDE","CREUX",
+  "DELTA","DENSE",
+  "FLORE","FONTE","FRANC","FUGUE","FUSEE",
+  "GENRE","GLACE","GOMME","GORGE","GRAIN","GRAVE","GREVE","GUIDE",
+  "HERSE",
+  "JETON","JUPON",
+  "LARGE","LUEUR","LUTTE",
+  "MASSE","MEUTE","MIXTE","MORAL","MOTIF","MOULE","MOYEN","MULET",
+  "NEIGE","NEVEU",
+  "OSIER","OVALE",
+  "PALME","PLUIE","POEME","POILU","PRIME","PROSE",
+  "REPAS","REPOS","ROBOT","ROMAN",
+  "SABOT","SALON","SAUCE","SAUNA","SERUM","SOBRE","SOEUR","SOINS","SONGE","SOURD","STYLO",
+  "TABAC","TABLE","TALON","TANTE","TAPIR","TENOR","TENTE","TERRE","THEME","TISSU","TOMBE","TORSE","TOTEM","TRAME","TRONC",
+  "ULTRA","USUEL",
+  "VALSE","VENIN","VERRE","VIDER","VIGNE","VIRUS","VOCAL","VODKA",
+  "ZEBRE","ZESTE",
 ].filter(m=>m.length===5&&/^[A-Z]{5}$/.test(m)))];
+
+// Tous les mots acceptés comme tentatives
+const VALIDES = new Set([...MOTS,
+  // A
+  "ABCES","ABORD","ABRIS","ACCES","ACHAT","ACIDE","ACIER","ACTES","ACTIF","ADAGE",
+  "ADIEU","ADORE","ADRET","AGILE","AGITE","AIMER","AINSI","ALLEE","ALPIN","AMANT",
+  "AMBRE","AMOUR","AMPLE","ANIME","ANNEE","AORTE","APRES","ARGOT","ARRET","ASILE",
+  "ASSEZ","ATOME","AVARE","AVIDE","AVOIR","AZOTE","ALBUM","ALMEE","ACNEE","ANETH",
+  "ALCEE","ALVIN","ACERO",
+  // B
+  "BAGUE","BANAL","BANDE","BARON","BATON","BEIGE","BETON","BICHE","BILAN",
+  "BOIRE","BOMBE","BONNE","BRAVE","BRIDE","BRISE","BRUME","BOCAL","BOULE","BOXON","BURIN",
+  "BLANC","BLASE","BARBU","BARIL","BEGUE","BERGE","BERNE","BIDET","BIGOT","BLINI",
+  "BOGUE","BRUNE","BROME","BREVE","BOVIN","BONZE","BURNE",
+  // C
+  "CALME","CAPOT","CARRE","CAUSE","CHAIR","CHAOS","CHAUD","CHENE","CHOSE","CIVIL",
+  "CLAIR","COBRA","COLLE","COLON","COPIE","COQUE","COUDE","COUPE","CRIME","CUIRE",
+  "CULTE","CACHE","CANON","CAPRE","CARPE","CEDRE","CLAME","CLORE","COCON","COING",
+  "CORNU","CREVE","CULOT","CUMIN","CABLE","CIDRE","CREME","CAPON","CARVI","CANIF",
+  "CENSE","CHAPE","CLOWN","COPRA","CHALE","CHIOT",
+  // D
+  "DALLE","DECOR","DEBIT","DEBUT","DELAI","DIODE","DOYEN","DRAIN","DUPER","DONNE",
+  "DINDE","DEVOT","DAMAS","DOLCE","DUVET",
+  // E
+  "ECLAT","ECRAN","EMAIL","ESSAI","EVEIL","EXACT","EXODE",
+  "EBAHI","ECART","ECUME","EGOUT","ELEVE","EMERI","EMOIS","ENCRE","ENVOL","EPOUX",
+  "ERRER","ETHER","ETUDE","ERGOT","EVITE","EPAIS","EMULE","ENTRE","ETRON",
+  // F
+  "FARCE","FAUNE","FERME","FICHE","FILOU","FOSSE","FOULE","FREIN","FRISE","FRONT",
+  "FALOT","FLEAU","FUMET","FIORD","FELIN","FELON","FOYER","FUMER","FURET","FEVRE",
+  // G
+  "GARDE","GRAIN","GRAND","GRELE","GUERE","GIVRE","GUISE","GENET","GENOU","GIRON",
+  "GNOME","GAMIN",
+  // H
+  "HALTE","HARPE","HAUTE","HORDE","HUILE","HAVRE","HEROS","HELAS","HAMPE","HERON","HYENE",
+  // I
+  "IVRES","IMPER",
+  // J
+  "JAMBE","JEUDI","JOYAU","JALON","JABOT",
+  // K
+  "KAYAK","KIWIS","KNOUT",
+  // L
+  "LAINE","LANDE","LARME","LASER","LEVER","LIGNE","LITRE","LOGER","LOGIS","LASSO",
+  "LODEN","LOTTE","LANCE","LARVE","LATIN","LAVER","LECON","LEGER","LEROT","LEVEE",
+  "LEVRE","LIEGE","LIEUE","LINON","LIPPE","LISSE","LODGE","LOQUE","LOTUS","LOUPE",
+  "LUBIE","LACIS","LAGON","LAIUS",
+  // M
+  "MALIN","MATCH","MERLE","MEULE","MITRE","MOINS","MORDU","MORUE",
+  "MATOU","METRO","MAUVE","MAGMA","MAGOT","MAIRE","MALUS","MAMIE","MARIN","MAURE",
+  "MECHE","MELEE","MERCI","MEROU","MIEUX","MILLE","MINCE","MINOT","MIXTE","MOCHE",
+  "MOLLE","MONTS","MOQUE","MURET","MUSER","MYOPE","NACRE",
+  // N
+  "NABOT","NASAL","NAVET","NIAIS","NOCIF","NOTER","NOYAU","NUQUE",
+  // O
+  "ORGUE","OPTER","OGIVE","OISON","OKAPI","ORALE",
+  // P
+  "PACHA","PATIN","PAVOT","PENDU","PICOT","PIVOT","PLEIN","PROUE","PANEL","PELLE",
+  "PITON","PLOMB","POCHE","POIRE","POINT","POMME","POSER","PINCE","PHASE","PERLE",
+  // Q
+  "QUETE",
+  // R
+  "ROUTE","ROYAL","RUINE","RAMER","RAMPE","RANGE","RASER","RATER","RECIT","REJET",
+  "RENDU","REVUE","RIDER","RIVAL","RONGE","RESTE","ROGUE","RABOT","RADIS","RAGOT",
+  "RAIDE","RATON","REBUS","ROBUR","RONCE",
+  // S
+  "SALUT","SATIN","SECHE","SIGNE","SOINS","SONDE","SAPIN","SELON","SERPE","SIXTE",
+  "SOUCI","SAUGE","SCOUT","SLAVE","SOBRE","SORTE","SCEAU","SOCLE","SABOT",
+  // T
+  "TARIF","TENIR","TIRER","TRONC","TOMME","TRUIE","TAROT","TAXIS","TEINT","TIMON",
+  "TIMOR","TURNE",
+  // U
+  "ULULE","UMBRE","URGER",
+  // V
+  "VARET","VAPOR","VARAN","VERBE","VERGE","VERSE","VALVE","VOGUE",
+  // W X Y Z
+  "XENON","YUCCA","ZOMBI","ZINEB","ZONAL",
+]);
 
 const SECRET = MOTS[Math.floor(Math.random()*MOTS.length)];
 const MAX = 6;
@@ -82,12 +178,12 @@ const CLAVIER = [
   ["Q","S","D","F","G","H","J","K","L","M"],
   ["ENTRÉE","W","X","C","V","B","N","⌫"]
 ];
-const TC = {correct:"#538d4e", present:"#b59f3b", absent:"#3a3a3c"};
-const KC = {correct:"#538d4e", present:"#b59f3b", absent:"#565758"};
+const TC  = {correct:"#538d4e",present:"#b59f3b",absent:"#3a3a3c"};
+const KC  = {correct:"#538d4e",present:"#b59f3b",absent:"#565758"};
 const PRI = {correct:3,present:2,absent:1};
 
 function calcColors(guess, mot) {
-  const res = Array(5).fill("absent"), left = [...mot];
+  const res=Array(5).fill("absent"), left=[...mot];
   for(let i=0;i<5;i++) if(guess[i]===mot[i]){res[i]="correct";left[i]=null;}
   for(let i=0;i<5;i++){
     if(res[i]==="correct") continue;
@@ -98,28 +194,31 @@ function calcColors(guess, mot) {
 }
 
 function App() {
-  const [essais,   setEssais]   = useState([]);
-  const [colors,   setColors]   = useState([]);
-  const [actuel,   setActuel]   = useState("");
-  const [keyStatus,setKeyStatus]= useState({});
-  const [fini,     setFini]     = useState(false);
-  const [gagne,    setGagne]    = useState(false);
-  const [erreur,   setErreur]   = useState("");
-  const [revRow,   setRevRow]   = useState(null);
-  const [bounceRow,setBounceRow]= useState(null);
-  const [shakeRow, setShakeRow] = useState(null);
-  const [modal,    setModal]    = useState(false);
+  const [essais,    setEssais]   = useState([]);
+  const [colors,    setColors]   = useState([]);
+  const [actuel,    setActuel]   = useState("");
+  const [keyStatus, setKeyStatus]= useState({});
+  const [fini,      setFini]     = useState(false);
+  const [gagne,     setGagne]    = useState(false);
+  const [erreur,    setErreur]   = useState("");
+  const [revRow,    setRevRow]   = useState(null);
+  const [bounceRow, setBounceRow]= useState(null);
+  const [shakeRow,  setShakeRow] = useState(null);
+  const [modal,     setModal]    = useState(false);
   const tids = useRef([]);
 
+  const err = (msg) => {
+    setErreur(msg);
+    setShakeRow(essais.length);
+    const t=setTimeout(()=>{setErreur("");setShakeRow(null);},600);
+    tids.current.push(t);
+  };
+
   const soumettre = useCallback(() => {
-    if(fini || revRow!==null) return;
-    if(actuel.length!==5){
-      setErreur("5 lettres !");
-      setShakeRow(essais.length);
-      const t=setTimeout(()=>{setErreur("");setShakeRow(null);},600);
-      tids.current.push(t);
-      return;
-    }
+    if(fini||revRow!==null) return;
+    if(actuel.length!==5){err("5 lettres !"); return;}
+    if(!VALIDES.has(actuel)){err("Mot inconnu !"); return;}
+
     const mot=actuel, rowIdx=essais.length;
     const cols=calcColors(mot,SECRET);
     setEssais(p=>[...p,mot]);
@@ -127,7 +226,6 @@ function App() {
     setActuel("");
     setRevRow(rowIdx);
 
-    // Reveal keyboard letter by letter at midpoint of each tile flip
     cols.forEach((c,i)=>{
       const t=setTimeout(()=>{
         const l=mot[i];
@@ -139,7 +237,6 @@ function App() {
       tids.current.push(t);
     });
 
-    // After all tiles revealed
     const t=setTimeout(()=>{
       setRevRow(null);
       if(mot===SECRET){
@@ -190,32 +287,27 @@ function App() {
           const isRev    = i===revRow;
           const isBounce = i===bounceRow;
           const isShake  = i===shakeRow;
-
           return (
             <div key={i} style={{display:"flex",gap:6,animation:isShake?"shake 0.5s ease":undefined}}>
               {Array.from({length:5}).map((_,j)=>{
                 let lettre="", bg="#121213", border="2px solid #3a3a3c", anim=undefined, cssVar={};
-
                 if(isRev){
                   lettre=essai[j];
                   anim=`flip 0.5s ease-in-out ${j*300}ms both`;
                   cssVar={"--tc":TC[cols[j]]};
                 } else if(essai){
-                  lettre=essai[j];
-                  bg=TC[cols[j]]; border=`2px solid ${TC[cols[j]]}`;
+                  lettre=essai[j]; bg=TC[cols[j]]; border=`2px solid ${TC[cols[j]]}`;
                 } else if(isInput){
                   lettre=actuel[j]||"";
                   border=lettre?"2px solid #999":"2px solid #3a3a3c";
                 }
-
                 return (
-                  <div key={j} style={{perspective:"300px",animation:isBounce?`bounce 0.6s ease ${j*80}ms both`:undefined}}>
+                  <div key={j} style={{animation:isBounce?`bounce 0.6s ease ${j*80}ms both`:undefined}}>
                     <div style={{
                       width:58,height:58,display:"flex",alignItems:"center",justifyContent:"center",
                       fontSize:26,fontWeight:800,color:"#fff",borderRadius:4,
                       ...(isRev?{}:{background:bg,border}),
-                      animation:anim,
-                      ...cssVar
+                      animation:anim,...cssVar
                     }}>{lettre}</div>
                   </div>
                 );
@@ -246,7 +338,7 @@ function App() {
       </div>
 
       {/* Modal */}
-      {modal && (
+      {modal&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",display:"flex",alignItems:"center",justifyContent:"center",animation:"fadeUp 0.3s ease"}}>
           <div style={{background:"#1a1a1b",border:"1px solid #3a3a3c",borderRadius:18,padding:"36px 44px",textAlign:"center",width:"85%",maxWidth:300,animation:"fadeUp 0.4s ease"}}>
             {gagne?(
