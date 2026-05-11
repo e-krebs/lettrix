@@ -1,11 +1,9 @@
-const CACHE = 'lettrix-v1';
-const ASSETS = ['./', './index.html', './mots.txt'];
+const CACHE = 'lettrix-v2';
+const SHELL  = ['./', './index.html', './mots.txt'];
 
-// Installation : mise en cache de tous les fichiers
+// Installation : mise en cache du shell
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
   self.skipWaiting();
 });
 
@@ -20,8 +18,21 @@ self.addEventListener('activate', e => {
 });
 
 // Fetch : cache en priorité, réseau en fallback
+// Les listes de mots externes (EN) sont aussi mises en cache dynamiquement
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      if(cached) return cached;
+      return fetch(e.request).then(response => {
+        if(response.ok) {
+          const url = e.request.url;
+          const isWordList = url.includes('mots.txt') || url.includes('wordle-list');
+          if(isWordList) {
+            caches.open(CACHE).then(c => c.put(e.request, response.clone()));
+          }
+        }
+        return response;
+      });
+    })
   );
 });
